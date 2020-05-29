@@ -6,33 +6,23 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-// Database connection
-const db = require('./util/database');
+const db = require('./util/database'); // Database connection
 
-// Used to find absolute path in any OS
-const path = require('path');
+const path = require('path'); // Used to find absolute path in any OS
 
-// Setting the templating engine
-app.set('view engine', 'ejs');
+app.set('view engine', 'ejs'); // Setting the templating engine
 
-// Not required to set if named views
-app.set('views', 'views');
+app.set('views', 'views'); // Not required to set if named views
 
-// For using files in public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // For using files in public folder
 
-// Requiring routes
-const adminRoutes = require('./routes/admin');
+const adminRoutes = require('./routes/admin'); // Requiring routes and controllers
 const shopRoutes = require('./routes/shop');
-
-// Requiring Controller for error
 const errorController = require('./controllers/error');
 
-// Requiring users
-const User = require('./models/user');
+const User = require('./models/user'); // Requiring users
 
-// Injecting user into our request for temporary use
-const userId = "5ece3554d10ca2114390fc7e";
+const userId = "5ece3554d10ca2114390fc7e"; // Injecting user into our request for temporary use
 app.use((req, res, next) => {
   User.findById(userId)
     .then(user => {
@@ -44,10 +34,7 @@ app.use((req, res, next) => {
     });
 });
 
-
-// Using imported Routes
-// app.use('/something', someroutes) this prepends /something before every route in someroutes
-app.use('/admin', adminRoutes);
+app.use('/admin', adminRoutes); // app.use('/something', someroutes) this prepends /something before every route in someroutes
 app.use(shopRoutes);
 app.use(errorController.get404);
 
@@ -56,13 +43,3 @@ db.mongoConnect(() => {
     console.log('Server Started');
   });
 });
-
-
-/**
- * Below is a user document
-  {
-    "_id":{"$oid":"5ece3554d10ca2114390fc7e"},
-    "name":"Vikram Kirti",
-    "email":"kirtivikram13@gmail.com"
-  }
- */
