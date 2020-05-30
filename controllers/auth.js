@@ -1,8 +1,18 @@
 const User = require('../models/user');
 const mongo = require('../util/database');
+const mongodb = require('mongodb');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+const crypto = require('crypto');
+
 const bcryptHashRounds = 12;
 
+const transporter = nodemailer.createTransport(sendgridTransport({
+  auth: {
+    api_key: "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"
+  }
+}));
 
 exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
@@ -89,8 +99,130 @@ exports.postSignup = (req, res, next) => {
           return user.save();
         })
         .then(result => {
+          // console.log('mailing ', req.body.email)
           res.redirect('/login');
+          return transporter.sendMail({
+            to: req.body.email,
+            from: 'theinfinitymail13@gmail.com',
+            subject: 'SignUp Succeeded',
+            html: '<h1>You successfully signed up!</h1>'
+          })
         })
         .catch(err => console.log(err));
     })
+}
+
+exports.getReset = (req, res, next) => {
+  res.render('auth/reset', {
+    path: '/reset',
+    pageTitle: 'Reset Password'
+  })
+}
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/resert');
+    }
+    const token = buffer.toString('hex');
+    const db = mongo.getDB();
+    let mailId = null;
+    db.collection('users')
+      .findOne({
+        name: req.body.name
+      })
+      .then(user => {
+        if (!user) {
+          req.flash('error', 'UserName Do Not Exist');
+          return res.redirect('/reset');
+        }
+        mailId = user.email;
+        return db.collection('users')
+          .updateOne({
+            _id: user._id
+          }, {
+            $set: {
+              resetToken: token,
+              resetTokenExpiration: Date.now() + 3600000
+            }
+          })
+          .then(() => {
+            res.redirect('/login');
+            return transporter.sendMail({
+              to: mailId,
+              from: 'theinfinitymail13@gmail.com',
+              subject: 'Reset Password',
+              html: `
+              <p>Password Change Requested</p>
+              <p>Clik this <a href="http://localhost:3000/new-password/${token}">Link</a> to set a new password</p>
+              `
+            })
+          })
+          .catch(e => console.log(e));
+      })
+  })
+}
+
+exports.getNewPassword = (req, res, next) => {
+  const token = req.params.token;
+  const db = mongo.getDB();
+  db.collection('users')
+    .findOne({
+      resetToken: token,
+      resetTokenExpiration: {
+        $gt: Date.now()
+      }
+    })
+    .then(user => {
+      if (!user) {
+        req.flash('error', 'Click Reset Password Again Token Expired');
+        return res.redirect('/login');
+      }
+      res.render('auth/new-password', {
+        path: '/new-password',
+        pageTitle: 'New Password',
+        userId: user._id.toString(),
+        passwordToken: token
+      })
+    })
+    .catch(e => console.log(e));
+}
+
+exports.postNewPassword = (req, res, next) => {
+  const userId = new mongodb.ObjectId(req.body.userId);
+  const passwordToken = req.body.passwordToken;
+  const newPassword = req.body.password;
+  // console.log(userId, passwordToken, newPassword);
+  const db = mongo.getDB();
+  db.collection('users')
+    .findOne({
+      _id: userId,
+      resetToken: passwordToken,
+      resetTokenExpiration: { $gt: Date.now() }
+    })
+    .then(user => {
+      if (!user) {
+        console.log("user not founnd");;
+        return res.redirect('/');
+      }
+      bcrypt.hash(newPassword, bcryptHashRounds)
+        .then(hashedPassword => {
+          return db
+            .collection('users')
+            .updateOne({
+              _id: user._id
+            }, {
+              $set: {
+                password: hashedPassword,
+                resetToken: undefined,
+                resetTokenExpiration: undefined
+              }
+            })
+        })
+        .then(() => {
+          return res.redirect('/login');
+        })
+    })
+    .catch(e => console.log(e));
 }

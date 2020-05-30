@@ -15,7 +15,7 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.fetchAllFromUserId(req.user._id)
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -69,14 +69,14 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
-  const id = req.body.productId;
+  const productId = req.body.productId;
   const updatedProduct = {
     title: req.body.title,
     imageUrl: req.body.imageUrl,
     price: req.body.price,
     description: req.body.description
   }
-  Product.updateOneById(id, updatedProduct)
+  Product.updateOneById(productId, updatedProduct, req.user._id)
     .then(() => {
       res.redirect('/admin/products');
     })
@@ -87,7 +87,7 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.deleteProduct = (req, res, next) => {
   const deleteId = req.body.productId;
-  Product.deleteOneById(deleteId)
+  Product.deleteOneById(deleteId, req.user._id)
     .then(() => {
       res.redirect('/admin/products');
     })

@@ -2,21 +2,7 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
-
-const db = require('./util/database'); // Database connection
-const dbURL = db.getConnectionString();
-
 const path = require('path'); // Used to find absolute path in any OS
-
-app.set('view engine', 'ejs'); // Setting the templating engine
-
-app.set('views', 'views'); // Not required to set if named views
-
-app.use(express.static(path.join(__dirname, 'public'))); // For using files in public folder
-
 const adminRoutes = require('./routes/admin'); // Requiring routes and controllers
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
@@ -26,6 +12,19 @@ const session = require('express-session');
 const csrf = require('csurf'); // Securing Cross-Site-Request-Forgery
 const csrfProtection = csrf();
 const flash = require('connect-flash');
+const db = require('./util/database'); // Database connection
+
+const dbURL = db.getConnectionString();
+
+app.set('view engine', 'ejs'); // Setting the templating engine
+
+app.set('views', 'views'); // Not required to set if named views
+
+app.use(express.static(path.join(__dirname, 'public'))); // For using files in public folder
+
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 
 // Session
 const sessionHash = "785H3G61681eh95p3gAV3jFbVCP43Go6K7Owr11I1aUNf6zb3Y0N9s0sTpt61AY7ijIg7zX1kbNN10h14q0lLM88lth5z5244XuZ35RWi30i7v04wb41G3c71f10i8131C2PKG48TIMiC8M120c803hLPa45DV3v91JL973c7Au4yK3942CU0a1XO49V0g18KQ97q513J6A9o9ZeU88c6I4RMzx8ISTyk39I9ew1tB674NC81jmU1i45o5v631cP";

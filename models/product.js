@@ -37,6 +37,22 @@ class Product {
       });
   }
 
+  static fetchAllFromUserId(id) {
+    const db = mongo.getDB();
+    return db.collection('products')
+      .find({
+        userId: new mongodb.ObjectId(id)
+      })
+      .toArray()
+      .then(products => {
+        // console.log(products);
+        return products;
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
   static findById(id) {
     const db = mongo.getDB();
     return db.collection('products')
@@ -47,26 +63,34 @@ class Product {
       .then(product => {
         // console.log('your product', product);
         if (product)
-        return product;
+          return product;
       })
       .catch(err => {
         console.log(err);
       });
   }
 
-  static updateOneById(id, updatedProduct) {
+  static updateOneById(productId, updatedProduct, userId) {
     const db = mongo.getDB();
     return db.collection('products')
-      .updateOne({_id: new mongodb.ObjectId(id)}, {$set: updatedProduct})
+      .updateOne({
+        _id: new mongodb.ObjectId(productId),
+        userId: new mongodb.ObjectId(userId)
+      }, {
+        $set: updatedProduct
+      })
       .catch(err => {
         console.log(err);
       });
   }
 
-  static deleteOneById(id) {
+  static deleteOneById(id, userId) {
     const db = mongo.getDB();
     return db.collection('products')
-      .deleteOne({_id: mongodb.ObjectId(id)});
+      .deleteOne({
+        _id: mongodb.ObjectId(id),
+        userId: mongodb.ObjectId(userId)
+      });
   }
 }
 

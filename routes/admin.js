@@ -24,4 +24,4 @@ router.post('/edit-product', authorizedPersonnelOnly, adminController.postEditPr
 // /admin/delete-product => POST
 router.post('/delete-product', authorizedPersonnelOnly, adminController.deleteProduct);
 
-module.exports = router;
+module.exports = router; 
