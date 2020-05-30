@@ -2,6 +2,8 @@ const express = require('express');
 
 const shopController = require('../controllers/shop');
 
+const authorizedPersonnelOnly = require('../security/authorizedPersonnelOnly');
+
 const router = express.Router();
 
 router.get('/', shopController.getIndex);
@@ -10,14 +12,14 @@ router.get('/products', shopController.getProducts);
 
 router.get('/products/:productId', shopController.getProduct)
 
-router.get('/cart', shopController.getCartProducts);
+router.get('/cart', authorizedPersonnelOnly, shopController.getCartProducts);
 
-router.post('/cart', shopController.postCartProduct)
+router.post('/cart', authorizedPersonnelOnly, shopController.postCartProduct)
 
-router.post('/cart-delete-item', shopController.postCartDeleteProduct);
+router.post('/cart-delete-item', authorizedPersonnelOnly, shopController.postCartDeleteProduct);
 
-router.post('/order-cart', shopController.postOrders);
+router.post('/order-cart', authorizedPersonnelOnly, shopController.postOrders);
 
-router.get('/orders', shopController.getOrders);
+router.get('/orders', authorizedPersonnelOnly, shopController.getOrders);
 
 module.exports = router;

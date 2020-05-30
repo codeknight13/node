@@ -22,8 +22,9 @@
         </div>
         <div class="card__actions">
           <a href="/products/<%= product._id %>"  class="btn">Details</a>
-          <!-- Since using inside a for loop you need to pass the product to includes -->
-          <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+          <% if (isAuthenticated) { %>
+            <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+          <% } %>
         </div>
       </article>
       <% } %>

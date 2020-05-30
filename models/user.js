@@ -3,18 +3,24 @@ const mongodb = require('mongodb');
 const mongo = require('../util/database');
 
 class User {
-  constructor(username, email, cart, id) {
-    this.name = username;
-    this.email = email;
-    this.cart = cart;
-    this._id = id;
+  constructor(userDetails) {
+    this.name = userDetails.name;
+    this.email = userDetails.email;
+    this.cart = userDetails.cart;
+    this.password = userDetails.password;
+    if (userDetails.id) this._id = userDetails.id;
   }
 
   save() {
     const db = mongo.getDB();
     return db
       .collection('users')
-      .insertOne(this);
+      .insertOne(this)
+      .then(result => {
+        // console.log(result.ops[0]._id);
+        this._id = result.ops[0]._id;
+        return result;
+      })
   }
 
   static findById(userId) {
@@ -148,7 +154,7 @@ class User {
       })
       .toArray()
       .then(orders => {
-        console.log(orders);
+        // console.log(orders);
         return orders;
       })
   }

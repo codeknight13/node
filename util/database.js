@@ -1,6 +1,8 @@
 const mongodb = require('mongodb');
 
 const connectionURL = 'mongodb+srv://codeknight13:V*k$1ml212665@cluster0-jb1si.mongodb.net/test?retryWrites=true&w=majority';
+const shopConnectionURL = 'mongodb+srv://codeknight13:V*k$1ml212665@cluster0-jb1si.mongodb.net/shop';
+
 
 const MongoClient = mongodb.MongoClient;
 
@@ -30,5 +32,10 @@ const getDB = () => {
   throw 'No database found';
 };
 
+const getConnectionString = () => {
+  return shopConnectionURL;
+}
+
 exports.mongoConnect = mongoConnect;
 exports.getDB = getDB;
+exports.getConnectionString = getConnectionString;

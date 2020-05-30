@@ -31,6 +31,8 @@
         <input type="hidden" name="productId" value="<%= product._id %>">
       <% } %>
       <button class="btn" type="submit"><%= editing?"Update Product":"Add Product" %></button>
+      <!-- the name has to be _csrf -->
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     </form>
   </main>
   <%- include('../includes/end.ejs') %>
