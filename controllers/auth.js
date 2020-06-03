@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
 const crypto = require('crypto');
+const validator = require('express-validator');
 
 const bcryptHashRounds = 12;
 
@@ -18,20 +19,30 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
-    isAuthenticated: false
+    oldInput: {
+      name: "",
+      password: "",
+    },
+    validationErrors: [],
   })
 }
 
 exports.postLogin = (req, res, next) => {
-  mongo.getDB()
-    .collection('users')
-    .findOne({
-      name: req.body.name
-    })
+  const errors = validator.validationResult(req);
+  User
+    .findByName(req.body.name)
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid UserName');
-        return res.redirect('/login');
+        return res.status(422).render('auth/login', {
+          path: '/login',
+          pageTitle: 'Login',
+          errorMessage: 'Please signup',
+          oldInput: {
+            name: req.body.name,
+            password: req.body.password,
+          },
+          validationErrors: errors.array(),
+        });
       }
       const enteredPassword = req.body.password;
       const cryptedUserPassword = user.password;
@@ -45,8 +56,16 @@ exports.postLogin = (req, res, next) => {
               res.redirect('/');
             });
           } else {
-            req.flash('error', 'Invalid Password');
-            res.redirect('/login');
+            return res.status(422).render('auth/login', {
+              path: '/login',
+              pageTitle: 'Login',
+              errorMessage: 'Invalid or Incorrect Password',
+              oldInput: {
+                name: req.body.name,
+                password: req.body.password,
+              },
+              validationErrors: [{param: 'password'}],
+            });
           }
         })
         .catch(err => {
@@ -66,50 +85,61 @@ exports.postLogout = (req, res, next) => {
 
 exports.getSignup = (req, res, next) => {
   res.render('auth/signup', {
-    path: '/auth/signup',
+    path: '/signup',
     pageTitle: 'SignUp',
-    isAuthenticated: false
+    oldInput: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    },
+    validationErrors: [],
   })
 }
 
 exports.postSignup = (req, res, next) => {
-  const db = mongo.getDB();
-  db.collection('users')
-    .findOne({
-      name: req.body.name
-    })
-    .then(user => {
-      const password = req.body.password;
-      const confirmPassword = req.body.confirmPassword;
-      if (user || password !== confirmPassword) {
-        req.flash('error', 'UserName Exist, Try Logging In');
-        return res.redirect('/signup');
+  const errors = validator.validationResult(req);
+  console.log(errors);
+  if (!errors.isEmpty()) {
+    console.log(req.body.email);
+    return res.status(422)
+      .render('auth/signup', {
+        path: '/signup',
+        pageTitle: 'SignUp',
+        errorMessage: errors.array()[0].msg,
+        oldInput: {
+          name: req.body.name,
+          email: req.body.email,
+          password: req.body.password,
+          confirmPassword: req.body.confirmPassword
+        },
+        validationErrors: errors.array(),
+      })
+  }
+  const password = req.body.password;
+  bcrypt.hash(password, bcryptHashRounds)
+    .then(hashedPassword => {
+      const userDetails = {
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword,
+        cart: {
+          items: []
+        }
       }
-      return bcrypt.hash(password, bcryptHashRounds)
-        .then(hashedPassword => {
-          const userDetails = {
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword,
-            cart: {
-              items: []
-            }
-          }
-          user = new User(userDetails);
-          return user.save();
-        })
-        .then(result => {
-          // console.log('mailing ', req.body.email)
-          res.redirect('/login');
-          return transporter.sendMail({
-            to: req.body.email,
-            from: 'theinfinitymail13@gmail.com',
-            subject: 'SignUp Succeeded',
-            html: '<h1>You successfully signed up!</h1>'
-          })
-        })
-        .catch(err => console.log(err));
+      user = new User(userDetails);
+      return user.save();
     })
+    .then(() => {
+      res.redirect('/login');
+      return transporter.sendMail({
+        to: req.body.email,
+        from: 'theinfinitymail13@gmail.com',
+        subject: 'SignUp Succeeded',
+        html: '<h1>You successfully signed up!</h1>'
+      })
+    })
+    .catch(err => console.log(err));
 }
 
 exports.getReset = (req, res, next) => {
@@ -199,7 +229,9 @@ exports.postNewPassword = (req, res, next) => {
     .findOne({
       _id: userId,
       resetToken: passwordToken,
-      resetTokenExpiration: { $gt: Date.now() }
+      resetTokenExpiration: {
+        $gt: Date.now()
+      }
     })
     .then(user => {
       if (!user) {

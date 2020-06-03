@@ -56,14 +56,11 @@ class Product {
   static findById(id) {
     const db = mongo.getDB();
     return db.collection('products')
-      .find({
+      .findOne({
         _id: new mongodb.ObjectId(id)
       })
-      .next()
       .then(product => {
-        // console.log('your product', product);
-        if (product)
-          return product;
+        return product;
       })
       .catch(err => {
         console.log(err);

@@ -8,10 +8,10 @@ const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const errorController = require('./controllers/error');
 const User = require('./models/user'); // Requiring users
-const session = require('express-session');
+const session = require('express-session'); // This is for sessions
 const csrf = require('csurf'); // Securing Cross-Site-Request-Forgery
-const csrfProtection = csrf();
-const flash = require('connect-flash');
+const csrfProtection = csrf(); // For Cross-Site-Forgery-Request Protection
+const flash = require('connect-flash'); // For flashing errors
 const db = require('./util/database'); // Database connection
 
 const dbURL = db.getConnectionString();

@@ -33,6 +33,15 @@ class User {
       .next();
   }
 
+  static findByName(userName) {
+    const db = mongo.getDB();
+    return db
+      .collection('users')
+      .findOne({
+        name: userName
+      })
+  }
+
   addToCart(product) {
     const db = mongo.getDB();
     if (!this.cart) {
