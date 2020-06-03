@@ -20,9 +20,10 @@ const mongoConnect = (cb) => {
       cb();
     })
     .catch(err => {
-      console.log(err);
-      throw err;
-    });
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    })
 }
 
 const getDB = () => {

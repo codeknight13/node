@@ -19,7 +19,9 @@ class Product {
         // console.log(result);
       })
       .catch(err => {
-        console.log(err);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       })
   }
 
@@ -33,8 +35,10 @@ class Product {
         return products;
       })
       .catch(err => {
-        console.log(err);
-      });
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   static fetchAllFromUserId(id) {
@@ -49,8 +53,10 @@ class Product {
         return products;
       })
       .catch(err => {
-        console.log(err);
-      });
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   static findById(id) {
@@ -63,8 +69,10 @@ class Product {
         return product;
       })
       .catch(err => {
-        console.log(err);
-      });
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   static updateOneById(productId, updatedProduct, userId) {
@@ -77,8 +85,10 @@ class Product {
         $set: updatedProduct
       })
       .catch(err => {
-        console.log(err);
-      });
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   static deleteOneById(id, userId) {

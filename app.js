@@ -50,7 +50,10 @@ app.use((req, res, next) => { // Injecting user into our request for further acc
   }
   User.findById(req.session.user._id)
     .then(user => {
-      req.user = new User({
+      if (!user) {
+        return next();
+      }
+      req.user = new User({ // You have to initialise it like this else you won't be able to use User methods
         name: user.name,
         email: user.email,
         password: user.password,
@@ -60,8 +63,10 @@ app.use((req, res, next) => { // Injecting user into our request for further acc
       next();
     })
     .catch(err => {
-      console.log(err);
-    });
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    })
 });
 
 app.use((req, res, next) => {
@@ -74,7 +79,12 @@ app.use((req, res, next) => {
 app.use('/admin', adminRoutes); // app.use('/something', someroutes) this prepends /something before every route in someroutes
 app.use(shopRoutes);
 app.use(authRoutes);
+app.get('/500', errorController.get500);
 app.use(errorController.get404);
+
+app.use((error, req, res, next) => {
+  res.redirect('/500');
+})
 
 db.mongoConnect(() => {
   app.listen(3000, () => {
