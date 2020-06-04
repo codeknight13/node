@@ -25,20 +25,22 @@ class Product {
       })
   }
 
-  static fetchAll() {
+  static collectionCount(collectionName) {
     const db = mongo.getDB();
-    return db.collection('products')
-      .find()
-      .toArray()
-      .then(products => {
-        // console.log(products);
-        return products;
-      })
+    return db
+      .collection(collectionName)
+      .countDocuments()
       .catch(err => {
         const error = new Error(err);
         error.httpStatusCode = 500;
         return next(error);
       })
+  }
+
+  static fetchAll() {
+    const db = mongo.getDB();
+    return db.collection('products')
+      .find()
   }
 
   static fetchAllFromUserId(id) {

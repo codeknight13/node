@@ -4,35 +4,72 @@ const fs = require('fs');
 const path = require('path');
 const pdfkit = require('pdfkit');
 
+const itemsPerPage = 2;
+
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll()
-    .then(products => {
-      res.render('shop/index', {
-        prods: products,
-        pageTitle: 'Shop',
-        path: '/'
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  let currPage = +req.query.page;
+  if (!currPage) {
+    currPage = 1;
+  }
+
+  Product.collectionCount('products')
+    .then(count => {
+      const totalPages = count / itemsPerPage + (count % itemsPerPage ? 1 : 0);
+      const firstDisplay = Math.max(currPage-2, 1);
+      const lastDisplay = Math.min(currPage+2, totalPages);
+      Product.fetchAll()
+        .skip((currPage - 1) * itemsPerPage)
+        .limit(itemsPerPage)
+        .toArray()
+        .then(products => {
+          res.render('shop/index', {
+            prods: products,
+            pageTitle: 'Shop',
+            path: '/',
+            lastPage: totalPages,
+            currPage: currPage,
+            firstDisplay: firstDisplay,
+            lastDisplay: lastDisplay,
+          });
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        })
     })
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(products => {
-      res.render('shop/product-list', {
-        prods: products,
-        pageTitle: 'All Products',
-        path: '/products'
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  let currPage = +req.query.page;
+  if (!currPage) {
+    currPage = 1;
+  }
+  Product.collectionCount('products')
+    .then(count => {
+      const totalPages = count / itemsPerPage + (count % itemsPerPage ? 1 : 0);
+      const firstDisplay = Math.max(currPage-2, 1);
+      const lastDisplay = Math.min(currPage+2, totalPages);
+      Product.fetchAll()
+        .skip((currPage - 1) * itemsPerPage)
+        .limit(itemsPerPage)
+        .toArray()
+        .then(products => {
+          res.render('shop/product-list', {
+            prods: products,
+            pageTitle: 'All Products',
+            path: '/products',
+            lastPage: totalPages,
+            currPage: currPage,
+            firstDisplay: firstDisplay,
+            lastDisplay: lastDisplay,
+          });
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        })
     })
 };
 
@@ -144,7 +181,7 @@ exports.getInvoice = (req, res, next) => {
       // Streaming the data instead of loading it in the memory
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
-      
+
       const pdfDoc = new pdfkit();
       pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
@@ -157,11 +194,11 @@ exports.getInvoice = (req, res, next) => {
       let cnt = 1;
       let priceTotal = 0;
       order.items.forEach(item => {
-        pdfDoc.fontSize(12).text( cnt + ') ' + 'Item Name: ' + item.title + '  -  ' + 'Item Quantity: ' + item.quantity + '  -  ' + 'Item Total: ' + item.quantity*item.price, {
+        pdfDoc.fontSize(12).text(cnt + ') ' + 'Item Name: ' + item.title + '  -  ' + 'Item Quantity: ' + item.quantity + '  -  ' + 'Item Total: ' + item.quantity * item.price, {
           align: 'left'
         })
         cnt++;
-        priceTotal += item.quantity*item.price;
+        priceTotal += item.quantity * item.price;
       })
       pdfDoc.fontSize(20).text('----------------------------------------------------------------------', {
         align: 'center'

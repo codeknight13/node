@@ -87,7 +87,7 @@ exports.postAddProduct = (req, res, next) => {
   );
   product.save()
     .then(() => {
-      res.redirect('/');
+      res.redirect('/admin/products');
     })
     .catch(err => {
       const error = new Error(err);
