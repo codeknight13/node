@@ -1,6 +1,6 @@
 const Product = require('../models/product');
 const validator = require('express-validator');
-const flash = require('connect-flash');
+const deleteFile = require('../util/deleteFile');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -21,8 +21,8 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAllFromUserId(req.user._id)
-  .then(products => {
-    res.render('admin/products', {
+    .then(products => {
+      res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
         path: '/admin/products'
@@ -37,11 +37,12 @@ exports.getProducts = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
   const userId = req.user._id;
   const errors = validator.validationResult(req);
+  // console.log('uploaded image meta data', image);
 
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
@@ -51,7 +52,6 @@ exports.postAddProduct = (req, res, next) => {
       hasError: true,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -59,6 +59,24 @@ exports.postAddProduct = (req, res, next) => {
       validationErrors: errors.array(),
     });
   }
+
+  if (!image) {
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      hasError: true,
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      errorMessage: 'Attached image not of png, jpg, or jpeg format',
+      validationErrors: [],
+    });
+  }
+
+  const imageUrl = image.path;
 
   const product = new Product(
     title,
@@ -99,18 +117,38 @@ exports.getEditProduct = (req, res, next) => {
         errorMessage: req.flash('error'),
         validationErrors: [],
       });
-    });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    })
 };
 
 exports.postEditProduct = (req, res, next) => {
   const productId = req.body.productId;
   const updatedProduct = {
     title: req.body.title,
-    imageUrl: req.body.imageUrl,
     price: req.body.price,
     description: req.body.description
   }
   const errors = validator.validationResult(req);
+  const image = req.file;
+
+  if (!image) {
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/add-product',
+      editing: true,
+      hasError: true,
+      product: {
+        ...updatedProduct,
+        _id: productId
+      },
+      errorMessage: 'Attached image not of png, jpg, or jpeg format',
+      validationErrors: [],
+    });
+  }
 
   if (!errors.isEmpty()) {
     return res.status(422).render('admin/edit-product', {
@@ -126,9 +164,22 @@ exports.postEditProduct = (req, res, next) => {
       validationErrors: errors.array(),
     });
   }
-  Product.updateOneById(productId, updatedProduct, req.user._id)
-    .then(() => {
-      res.redirect('/admin/products');
+
+  if (image) {
+    updatedProduct.imageUrl = image.path;
+  }
+  Product.findById(productId)
+    .then(product => {
+      deleteFile(product.imageUrl);
+      Product.updateOneById(productId, updatedProduct, req.user._id)
+        .then(() => {
+          res.redirect('/admin/products');
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        })
     })
     .catch(err => {
       const error = new Error(err);
@@ -141,6 +192,7 @@ exports.deleteProduct = (req, res, next) => {
   const deleteId = req.body.productId;
   Product.deleteOneById(deleteId, req.user._id)
     .then(() => {
+      deleteFile(req.body.imageUrl);
       res.redirect('/admin/products');
     })
     .catch(err => {

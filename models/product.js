@@ -97,7 +97,12 @@ class Product {
       .deleteOne({
         _id: mongodb.ObjectId(id),
         userId: mongodb.ObjectId(userId)
-      });
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 }
 

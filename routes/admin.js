@@ -25,11 +25,6 @@ router.post('/add-product', [
     .trim(),
 
     validator
-    .check('imageUrl', 'URL invalid')
-    .isURL()
-    .trim(),
-
-    validator
     .check('price', 'Price should be float')
     .notEmpty()
     .isFloat()
@@ -58,11 +53,6 @@ router.post('/edit-product', [
       min: 3
     })
     .isString()
-    .trim(),
-
-    validator
-    .check('imageUrl', 'URL invalid')
-    .isURL()
     .trim(),
 
     validator

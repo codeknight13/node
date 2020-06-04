@@ -22,4 +22,6 @@ router.post('/order-cart', authorizedPersonnelOnly, shopController.postOrders);
 
 router.get('/orders', authorizedPersonnelOnly, shopController.getOrders);
 
+router.get('/orders/:orderId', authorizedPersonnelOnly, shopController.getInvoice);
+
 module.exports = router;

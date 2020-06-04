@@ -52,7 +52,6 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
             req.session.save(err => { // to make sure that we redirect only when write is completed on mongodb
-              if (err) console.log(err);
               res.redirect('/');
             });
           } else {
@@ -100,9 +99,9 @@ exports.getSignup = (req, res, next) => {
 
 exports.postSignup = (req, res, next) => {
   const errors = validator.validationResult(req);
-  console.log(errors);
+  // console.log(errors);
   if (!errors.isEmpty()) {
-    console.log(req.body.email);
+    // console.log(req.body.email);
     return res.status(422)
       .render('auth/signup', {
         path: '/signup',
@@ -157,7 +156,6 @@ exports.getReset = (req, res, next) => {
 exports.postReset = (req, res, next) => {
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
-      console.log(err);
       return res.redirect('/resert');
     }
     const token = buffer.toString('hex');
@@ -236,7 +234,6 @@ exports.postNewPassword = (req, res, next) => {
   const userId = new mongodb.ObjectId(req.body.userId);
   const passwordToken = req.body.passwordToken;
   const newPassword = req.body.password;
-  // console.log(userId, passwordToken, newPassword);
   const db = mongo.getDB();
   db.collection('users')
     .findOne({
@@ -248,7 +245,6 @@ exports.postNewPassword = (req, res, next) => {
     })
     .then(user => {
       if (!user) {
-        console.log("user not founnd");;
         return res.redirect('/');
       }
       bcrypt.hash(newPassword, bcryptHashRounds)

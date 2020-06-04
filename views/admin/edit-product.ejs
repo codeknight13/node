@@ -10,7 +10,14 @@
     <% if (errorMessage.length) { %>
       <div class="user-message user-message--error"><%= errorMessage %> </div>     
     <% } %>
-    <form class="product-form" action="/admin/<%= editing?"edit-product":"add-product" %>" method="POST">
+    <!-- FORM -->
+    <form 
+      class="product-form" 
+      action="/admin/<%= editing?"edit-product":"add-product" %>" 
+      method="POST" 
+      enctype="multipart/form-data">
+
+      <!-- TITLE -->
       <div class="form-control">
         <label for="title">Title</label>
         <input 
@@ -21,16 +28,17 @@
           id="title" 
           value="<%= editing || hasError ? product.title.trim() : null%>">
       </div>
+
+      <!-- IMAGE URL -->
       <div class="form-control">
-        <label for="imageUrl">Image URL</label>
+        <label for="image">Image</label>
         <input 
-        class="<%= validationErrors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>"
-          placeholder="Add URL" 
-          type="text" 
-          name="imageUrl" 
-          id="imageUrl" 
-          value="<%= editing || hasError ? product.imageUrl.trim() : null%>">
+          type="file" 
+          name="image" 
+          id="image">
       </div>
+
+      <!-- PRICE -->
       <div class="form-control">
         <label for="price">Price</label>
         <input 
@@ -41,6 +49,8 @@
           id="price" step="0.01" 
           value="<%= editing || hasError ? product.price : null%>">
       </div>
+
+      <!-- DESCRIPTION -->
       <div class="form-control">
         <label for="description">Description</label>
         <!-- everything between the <textarea> and </textarea> is considered as an input -->
@@ -51,6 +61,8 @@
           id="description" 
           rows="5"><%= editing || hasError ? product.description : null%></textarea>
       </div>
+
+      <!-- ID -->
       <% if (editing) { %>
       <input type="hidden" name="productId" value="<%= product._id %>">
       <% } %>

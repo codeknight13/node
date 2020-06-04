@@ -17,9 +17,13 @@ class User {
       .collection('users')
       .insertOne(this)
       .then(result => {
-        // console.log(result.ops[0]._id);
         this._id = result.ops[0]._id;
         return result;
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       })
   }
 
@@ -27,10 +31,14 @@ class User {
     const db = mongo.getDB();
     return db
       .collection('users')
-      .find({
+      .findOne({
         _id: new mongodb.ObjectId(userId)
       })
-      .next();
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   static findByName(userName) {
@@ -39,6 +47,25 @@ class User {
       .collection('users')
       .findOne({
         name: userName
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
+  }
+
+  static findOrderById(orderId) {
+    const db = mongo.getDB();
+    return db
+      .collection('orders')
+      .findOne({
+        _id: new mongodb.ObjectId(orderId)
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       })
   }
 
@@ -59,7 +86,12 @@ class User {
           $set: {
             cart: cart
           }
-        });
+        })
+        .catch(err => {
+          const error = new Error(err);
+          error.httpStatusCode = 500;
+          return next(error);
+        })
     }
     const updatedCart = {
       ...this.cart
@@ -81,7 +113,12 @@ class User {
         $set: {
           cart: updatedCart
         }
-      });
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   getCartProducts() {
@@ -105,7 +142,12 @@ class User {
             }).quantity
           }
         });
-      });
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   deleteById(productId) {
@@ -121,7 +163,12 @@ class User {
             items: updatedCartItems
           }
         }
-      });
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   addOrder() {
@@ -133,7 +180,8 @@ class User {
           user: {
             _id: new mongodb.ObjectId(this._id),
             name: this.name
-          }
+          },
+          orderDate: Date.now()
         }
         return db
           .collection('orders')
@@ -152,6 +200,11 @@ class User {
             }
           })
       })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      })
   }
 
   getOrders() {
@@ -163,8 +216,12 @@ class User {
       })
       .toArray()
       .then(orders => {
-        // console.log(orders);
         return orders;
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       })
   }
 }
