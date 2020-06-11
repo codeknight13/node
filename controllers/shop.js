@@ -138,7 +138,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 exports.postOrders = (req, res, next) => {
   req.user.addOrder()
     .then(() => {
-      res.redirect('/');
+      res.redirect('/orders');
     })
     .catch(err => {
       const error = new Error(err);

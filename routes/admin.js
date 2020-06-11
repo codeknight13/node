@@ -74,6 +74,6 @@ router.post('/edit-product', [
 );
 
 // /admin/delete-product => POST
-router.post('/delete-product', authorizedPersonnelOnly, adminController.deleteProduct);
+router.delete('/delete/:productId', authorizedPersonnelOnly, adminController.deleteProduct);
 
 module.exports = router;

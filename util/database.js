@@ -1,8 +1,8 @@
 const mongodb = require('mongodb');
 
-const connectionURL = 'mongodb+srv://codeknight13:V*k$1ml212665@cluster0-jb1si.mongodb.net/test?retryWrites=true&w=majority';
-const shopConnectionURL = 'mongodb+srv://codeknight13:V*k$1ml212665@cluster0-jb1si.mongodb.net/shop';
+const connectionURL = `mongodb+srv://${process.env.mongo_user}:${process.env.mongo_pass}@cluster0-jb1si.mongodb.net/${process.env.mongo_database}?retryWrites=true&w=majority`;
 
+const shopConnectionURL = `mongodb+srv://${process.env.mongo_user}:${process.env.mongo_pass}@cluster0-jb1si.mongodb.net/${process.env.mongo_database}`;
 
 const MongoClient = mongodb.MongoClient;
 

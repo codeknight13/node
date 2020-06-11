@@ -15,6 +15,8 @@ const db                  =       require('./util/database'); // Database connec
 const dbURL               =       db.getConnectionString();
 const multer              =       require('multer');
 const randomId            =       require('./util/randomId');
+const helmet              =       require('helmet');
+const compression         =       require('compression');
 
 app.set('view engine', 'ejs'); // Setting the templating engine
 
@@ -27,6 +29,8 @@ app.use(bodyParser.urlencoded({ // Used for text-only data, Cannot be used to pa
   extended: false
 }));
 
+app.use(helmet());  // for deployment
+app.use(compression());   // for deployment
 
 // Configuring Multer
 const fileStorage = multer.diskStorage({
@@ -117,7 +121,7 @@ app.use((error, req, res, next) => {
 })
 
 db.mongoConnect(() => {
-  app.listen(3000, () => {
+  app.listen(3000 || process.env.PORT, () => {
     console.log('Server Started');
   });
 });

@@ -12,7 +12,7 @@
       <% orders.forEach(order => { %>
       <li class="orders__item">
         <h1>
-          Order Time: <%= Date(order.orderDate).substring(0,21) %> hrs 
+          Order Time: <%= order.orderDate.toString().substring(0,21)%> Hrs 
           <a style="float: right; text-decoration: none; color: rgb(139, 163, 30);" href="/orders/<%= order._id %> ">Invoice</a>
         </h1>
         <ul class="orders__products">

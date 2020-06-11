@@ -173,7 +173,7 @@ class User {
 
   addOrder() {
     const db = mongo.getDB();
-    return this.getCartProducts()
+    return this.getCartProducts()   // get the products in the cart and
       .then(products => {
         const order = {
           items: products,
@@ -181,13 +181,13 @@ class User {
             _id: new mongodb.ObjectId(this._id),
             name: this.name
           },
-          orderDate: Date.now()
+          orderDate: new Date()
         }
         return db
           .collection('orders')
           .insertOne(order);
       })
-      .then(() => {
+      .then(() => {   // empty the cart after the order is placed
         return db
           .collection('users')
           .updateOne({
