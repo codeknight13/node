@@ -120,11 +120,15 @@ app.use((error, req, res, next) => {
   res.redirect('/500');
 })
 
-db.mongoConnect(() => {
-  app.listen(3000 || process.env.PORT, () => {
-    console.log('Server Started');
-  });
-});
+const port = process.env.PORT;
+
+app.listen(port, () => {
+  console.log('Server Started');
+  db.mongoConnect(() => {
+    console.log('Connected to database');
+  })
+})
+
 
 // if you ever come acrross situation where you have closed your server improperly and wants to reboot it use: - 
 // => lsof -i tcp:portYouUsed
