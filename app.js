@@ -120,7 +120,7 @@ app.use((error, req, res, next) => {
   res.redirect('/500');
 })
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log('Server Started');

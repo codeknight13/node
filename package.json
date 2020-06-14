@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "mongo_user=vikram_kirti mongo_pass=EnnzfNWbCQyTTjv7 mongo_database=shop node app.js",
+    "start": "mongo_user=vikram_kirti mongo_pass=EnnzfNWbCQyTTjv7 mongo_database=shop cloud_name=codeknight13 cloud_api_key=123111366562162 cloud_api_secret=j-1tO7nmoixoFkM5H4iIotlBk1I node app.js",
     "start-server": "node app.js"
   },
   "author": "Maximilian Schwarzmüller",
@@ -19,6 +19,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "cloudinary": "^1.22.0",
     "compression": "^1.7.4",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^2.3.2",
