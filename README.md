@@ -9,6 +9,7 @@ This is a shopping website built using node js as server side language on MVC pa
 * **Technology** : MVC pattern, Javascript, NodeJS, EJS templating engine for server-side rendering
 * **Cloud Service Provider**: Heroku
 * **Database** : MongoDB
+* **CDN for Image Data** : Cloudinary
 
 ---
 
